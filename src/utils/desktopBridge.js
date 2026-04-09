@@ -22,6 +22,7 @@ const MIME_TYPES = {
 
 const assetUrlCache = new Map();
 
+const isDesktop = typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__);
 const normalizeAssetPath = (relativePath) => relativePath.replace(/\\/g, '/').replace(/^\/+/, '');
 const invokeAssetCommand = (command, relativePath) => invoke(command, { relativePath: normalizeAssetPath(relativePath) });
 
@@ -37,7 +38,7 @@ const createObjectUrl = (base64, mimeType) => {
 };
 
 const desktopBridge = {
-  isDesktop: typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__),
+  isDesktop,
 
   openFile() {
     return invoke('open_nui_file');
@@ -69,6 +70,46 @@ const desktopBridge = {
     const assetUrl = createObjectUrl(bytesBase64, getMimeType(normalizedPath));
     assetUrlCache.set(normalizedPath, assetUrl);
     return assetUrl;
+  },
+
+  async getWindowState() {
+    if (!isDesktop) {
+      return { isMaximized: false };
+    }
+
+    return invoke('get_window_state');
+  },
+
+  minimizeWindow() {
+    if (!isDesktop) {
+      return Promise.resolve();
+    }
+
+    return invoke('minimize_window');
+  },
+
+  toggleWindowMaximize() {
+    if (!isDesktop) {
+      return Promise.resolve({ isMaximized: false });
+    }
+
+    return invoke('toggle_window_maximize');
+  },
+
+  closeWindow() {
+    if (!isDesktop) {
+      return Promise.resolve();
+    }
+
+    return invoke('close_window');
+  },
+
+  startWindowDrag() {
+    if (!isDesktop) {
+      return Promise.resolve();
+    }
+
+    return invoke('start_window_drag');
   }
 };
 

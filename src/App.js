@@ -29,6 +29,7 @@ const CONTROL_BUTTONS = [
   { type: 'edit', label: '+ Edit' },
   { type: 'image', label: '+ Image' }
 ];
+const DEFAULT_WINDOW_STATE = { isMaximized: false };
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -88,6 +89,40 @@ const createControl = (type, index) => ({
   }
 });
 
+function WindowControlIcon({ type, isMaximized = false }) {
+  if (type === 'minimize') {
+    return (
+      <svg viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M2 6.5h8" />
+      </svg>
+    );
+  }
+
+  if (type === 'maximize' && isMaximized) {
+    return (
+      <svg viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M4 2.5h5.5V8" />
+        <path d="M2.5 4H8v5.5H2.5z" />
+      </svg>
+    );
+  }
+
+  if (type === 'maximize') {
+    return (
+      <svg viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M2.5 2.5h7v7h-7z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 12 12" aria-hidden="true">
+      <path d="M3 3l6 6" />
+      <path d="M9 3l-6 6" />
+    </svg>
+  );
+}
+
 function App() {
   const isDesktopShell = desktopBridge.isDesktop === true;
   const [nuiData, setNuiData] = useState(parseNui(DEFAULT_NUI));
@@ -97,6 +132,7 @@ function App() {
   const [currentFileName, setCurrentFileName] = useState('new_window.nui');
   const [fileEncodingInfo, setFileEncodingInfo] = useState(DEFAULT_ENCODING_INFO);
   const [currentFilePath, setCurrentFilePath] = useState(null);
+  const [windowState, setWindowState] = useState(DEFAULT_WINDOW_STATE);
   const nuiDataRef = useRef(nuiData);
   const currentFileNameRef = useRef(currentFileName);
   const fileEncodingInfoRef = useRef(fileEncodingInfo);
@@ -156,6 +192,15 @@ function App() {
     setScale(currentScale => clamp(currentScale + delta, MIN_CANVAS_SCALE, MAX_CANVAS_SCALE));
   }, []);
 
+  const syncWindowState = useCallback(async () => {
+    try {
+      const nextWindowState = await desktopBridge.getWindowState();
+      setWindowState(nextWindowState);
+    } catch (err) {
+      console.error('Failed to sync window state.', err);
+    }
+  }, []);
+
   const flushPendingEditorChanges = useCallback(async () => {
     const activeElement = document.activeElement;
 
@@ -179,6 +224,15 @@ function App() {
 
     recordHistoryState(nuiData);
   }, [nuiData, recordHistoryState]);
+
+  useEffect(() => {
+    if (!isDesktopShell) {
+      return undefined;
+    }
+
+    void syncWindowState();
+    return undefined;
+  }, [isDesktopShell, syncWindowState]);
 
   const undo = useCallback(() => {
     const history = historyRef.current;
@@ -310,6 +364,31 @@ function App() {
       void handleSave();
     }
   };
+
+  const handleWindowMinimize = useCallback(() => {
+    void desktopBridge.minimizeWindow();
+  }, []);
+
+  const handleWindowMaximizeToggle = useCallback(async () => {
+    try {
+      const nextWindowState = await desktopBridge.toggleWindowMaximize();
+      setWindowState(nextWindowState);
+    } catch (err) {
+      console.error('Failed to toggle window maximize.', err);
+    }
+  }, []);
+
+  const handleWindowClose = useCallback(() => {
+    void desktopBridge.closeWindow();
+  }, []);
+
+  const handleWindowDragStart = useCallback((event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    void desktopBridge.startWindowDrag();
+  }, []);
 
   const handleExportHtml = async () => {
     try {
@@ -486,9 +565,18 @@ function App() {
   }
 
   return (
-    <div className="App desktop-shell">
+    <div
+      className="App desktop-shell"
+      data-window-maximized={windowState.isMaximized}
+    >
       <header className="App-header">
-        <div className="header-brand">
+        <div
+          className="header-brand"
+          onMouseDown={handleWindowDragStart}
+          onDoubleClick={() => {
+            void handleWindowMaximizeToggle();
+          }}
+        >
           <span className="header-brand-mark"></span>
           <h1>SylvinaJTOOL</h1>
         </div>
@@ -513,6 +601,35 @@ function App() {
           {CONTROL_BUTTONS.map(control => (
             <button key={control.type} onClick={() => addControl(control.type)}>{control.label}</button>
           ))}
+        </div>
+        <div className="titlebar-spacer" onMouseDown={handleWindowDragStart}></div>
+        <div className="window-controls">
+          <button
+            type="button"
+            className="window-control-button"
+            aria-label="Minimize window"
+            onClick={handleWindowMinimize}
+          >
+            <WindowControlIcon type="minimize" />
+          </button>
+          <button
+            type="button"
+            className="window-control-button"
+            aria-label={windowState.isMaximized ? 'Restore window' : 'Maximize window'}
+            onClick={() => {
+              void handleWindowMaximizeToggle();
+            }}
+          >
+            <WindowControlIcon type="maximize" isMaximized={windowState.isMaximized} />
+          </button>
+          <button
+            type="button"
+            className="window-control-button window-control-button-close"
+            aria-label="Close window"
+            onClick={handleWindowClose}
+          >
+            <WindowControlIcon type="close" />
+          </button>
         </div>
       </header>
       <div className="main-container">

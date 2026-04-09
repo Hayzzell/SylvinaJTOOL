@@ -16,7 +16,7 @@ function resolveProjectPaths(projectRoot) {
   const iconsDir = path.join(projectRoot, 'src-tauri', 'icons');
 
   return {
-    sourcePath: path.join(projectRoot, 'SylvinaBackFree.png'),
+    sourcePath: path.join(projectRoot, 'SylvinaBackFree.png'), // if you want to convert your icon just replace this with the path to your source image, it should be a square png  512x512 or larger 
     iconsDir,
     iconPngPath: path.join(iconsDir, 'icon.png'),
     iconIcoPath: path.join(iconsDir, 'icon.ico')
@@ -69,3 +69,5 @@ main().catch(error => {
   console.error('[SylvinaJTOOL icons] failed to generate Tauri icon assets', error);
   process.exitCode = 1;
 });
+
+//yes i am that lazy to convert it to ico every time i change the icon 

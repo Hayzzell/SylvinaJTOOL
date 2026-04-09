@@ -7,6 +7,7 @@ use std::path::{Component, Path, PathBuf};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
+use tauri::Window;
 
 type CommandResult<T> = Result<T, String>;
 
@@ -45,6 +46,12 @@ struct SaveFileResult {
     canceled: bool,
     name: Option<String>,
     path: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct WindowState {
+    is_maximized: bool,
 }
 
 impl SaveFileResult {
@@ -251,6 +258,39 @@ fn read_asset_bytes(relative_path: String) -> CommandResult<Option<String>> {
     Ok(read_optional_asset_bytes(&relative_path)?.map(|bytes| encode_base64(&bytes)))
 }
 
+#[tauri::command]
+fn get_window_state(window: Window) -> CommandResult<WindowState> {
+    let is_maximized = window.is_maximized().map_err(to_string_error)?;
+
+    Ok(WindowState { is_maximized })
+}
+
+#[tauri::command]
+fn minimize_window(window: Window) -> CommandResult<()> {
+    window.minimize().map_err(to_string_error)
+}
+
+#[tauri::command]
+fn toggle_window_maximize(window: Window) -> CommandResult<WindowState> {
+    if window.is_maximized().map_err(to_string_error)? {
+        window.unmaximize().map_err(to_string_error)?;
+    } else {
+        window.maximize().map_err(to_string_error)?;
+    }
+
+    get_window_state(window)
+}
+
+#[tauri::command]
+fn close_window(window: Window) -> CommandResult<()> {
+    window.close().map_err(to_string_error)
+}
+
+#[tauri::command]
+fn start_window_drag(window: Window) -> CommandResult<()> {
+    window.start_dragging().map_err(to_string_error)
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -258,7 +298,12 @@ fn main() {
             save_file,
             save_file_as,
             read_asset_text,
-            read_asset_bytes
+            read_asset_bytes,
+            get_window_state, // were added since i wanted to build the window control with the rest of the app looked ugly with the default windows one. 
+            minimize_window,
+            toggle_window_maximize,
+            close_window,
+            start_window_drag
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

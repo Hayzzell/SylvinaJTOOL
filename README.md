@@ -20,7 +20,8 @@ Run `npm run lint` to verify the frontend, build tools Rust formatting and Tauri
 2. Install dependencies with `npm install`.
 3. Run `npm run dist:win`.
 4. The executable is written to `dist/SylvinaJTOOL.exe`.
-5. Put your external assets in `dist/static-assets` next to the exe.
+5. If that file is locked, the build writes a timestamped `dist/SylvinaJTOOL.next.*.exe` fallback instead.
+6. Put your external assets in `dist/static-assets` next to the exe.
 
 ## IMPORTANT
 - `static-assets/` must contain your external resources.
