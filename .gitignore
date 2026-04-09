@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+dist-*/
+coverage/
+src-tauri/target/
+src-tauri/icons/icon.ico
+src-tauri/icons/icon.png
+static-assets/*
+!static-assets/.gitkeep
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

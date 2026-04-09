@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "SylvinaJTOOL",
+  "version": "0.1.0",
+  "identifier": "com.sylvina.jtool",
+  "build": {
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "SylvinaJTOOL",
+        "width": 1600,
+        "height": 960,
+        "minWidth": 1200,
+        "minHeight": 720,
+        "resizable": true,
+        "fullscreen": false,
+        "maximized": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "windows": {
+      "digestAlgorithm": "sha256"
+    }
+  }
+}

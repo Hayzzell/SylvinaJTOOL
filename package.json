@@ -1,0 +1,41 @@
+{
+  "name": "sylvinajtool",
+  "version": "0.1.0",
+  "description": "Standalone Tauri NUI editor for Rappelz.",
+  "author": "Sylvina Team",
+  "private": true,
+  "scripts": {
+    "start": "npm run build:icon && npm run build && node tools/run-cargo.js run --manifest-path src-tauri/Cargo.toml",
+    "build:icon": "node tools/generate-icons.js",
+    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
+    "lint": "npm run lint:js && npm run lint:rust",
+    "lint:js": "eslint --max-warnings=0 \"src/**/*.js\" \"tools/**/*.js\"",
+    "lint:js:fix": "eslint --fix \"src/**/*.js\" \"tools/**/*.js\"",
+    "lint:rust": "node tools/run-cargo.js fmt --manifest-path src-tauri/Cargo.toml --all --check && node tools/run-cargo.js clippy --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings",
+    "dist:win": "npm run build:icon && npm run build && node tools/run-cargo.js build --release --manifest-path src-tauri/Cargo.toml && node tools/copy-tauri-artifact.js",
+    "test": "react-scripts test"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "iconv-lite-umd": "^0.6.10"
+  },
+  "devDependencies": {
+    "png-to-ico": "^3.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "sharp": "^0.34.5"
+  }
+}
