@@ -3,6 +3,7 @@
 SylvinaJTOOL is a standalone Tauri editor for Rappelz NUI files.
 Why tauri? 
 Project was originally web based and not meant to be standalone app
+<img width="1581" height="864" alt="image" src="https://github.com/user-attachments/assets/9f964bc0-c73d-4b12-9104-b40b017469f5" />
 
 ## Local desktop run
 
