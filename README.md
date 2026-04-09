@@ -1,6 +1,8 @@
 # SylvinaJTOOL
 
 SylvinaJTOOL is a standalone Tauri editor for Rappelz NUI files.
+Why tauri? 
+Project was originally web based and not meant to be standalone app
 
 ## Local desktop run
 
@@ -26,3 +28,9 @@ Run `npm run lint` to verify the frontend, build tools Rust formatting and Tauri
 ## IMPORTANT
 - `static-assets/` must contain your external resources.
 - Supported asset folders include `dds`, `jpg`, `png`, `spr`, and `tga`.
+
+## Additional
+- before you commit pull requests please lint the code before hand 
+- if you did UI changes show before and after images of your change 
+- Thank you!
+
